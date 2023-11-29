@@ -22,13 +22,15 @@ class Environment:
         self.env_descr = {"bed" : "A warm and soft bed",
                         "lighter" : "Can be used to light the stove",
                         "stove" : "Can be used to cook some meal",
-                        "shelter" : "Too dark, need to find a lamp"}
+                        "shelter" : "A well decorated spacious room",
+                        "basement": "Looks like this is place is well suited to defy the chaos outside"}
         
         self.inventory = ["light"]
+        self.enemies = False
 
     def entrance(self):
         if self.currentEnv != "entrance":
-            print(f"{self.env_descr.get('shelter')}")
+            print(self.env_descr.get('shelter'))
             self.currentEnv = "entrance"
             print(self.currentEnv)
 
@@ -38,7 +40,7 @@ class Environment:
     def bedroom(self):
         if self.currentEnv != "bedroom":
             print("going upstairs")
-            print(f"{self.env_descr.get('bed')}")
+            print(self.env_descr.get('bed'))
             self.currentEnv = "bedroom"
             print(self.currentEnv)
 
@@ -48,7 +50,7 @@ class Environment:
     def Basement(self):
         if self.currentEnv != "basement":
             print("going to basement")
-            print("its too dark")
+            print(self.env_descr.get('basement'))
             self.currentEnv = "basement"
             print(self.currentEnv)
 
@@ -62,8 +64,9 @@ class Environment:
                 self.currentEnv = "basement"
                 print(self.currentEnv)
             else:
-                print("Armory acessed!!")
                 self.currentEnv = "armory"
+                print("The armory doors slowly slid open")
+                print("among the weapon hangers and tables a zombie sprang onto me")
 
         elif self.currentEnv == "armory":
             print("already there")
@@ -74,6 +77,7 @@ class Environment:
     
     @currentEnv.setter
     def currentEnv(self, new_env):
+        print(f"Setting environment to {new_env}")
         self._env = new_env
 
     def interaction(self):
@@ -82,19 +86,24 @@ class Environment:
         if self.currentEnv == "entrance":
             items = ["cell", "candle", "lighter", "map", "torch"]
             self.inventory.extend(items)
-            print(self.inventory)
+            print(f"found: {items}")
             
         elif self.currentEnv == "basement":
             items = ["keys to armory", "gasoline can", "torch", "red tape", "baseball  bat", "large gears"]
             self.inventory.extend(items)
-            print(self.inventory)
+            print(f"found: {items}")
+        
+        elif self.currentEnv == "armory":
+            items = ["9mm glock 20", "band aids", "9mm mags"]
+            self.inventory.extend(items)
+            
+    
         
 
     
             
-class Character(Environment):
+class Character():
     def __init__(self, name, weapon_pri = None, weapon_sec = None, third_weapon = "knife"):
-        super().__init__()
         self.name = name
 
         self.weapon_pri = weapon_pri
@@ -105,46 +114,35 @@ class Character(Environment):
         self.health = 100
         self.level = 1
         self.directions = ["north", "south", "east", "west"]
-        # self.user_input = input(f"Enter your move --> ").lower()
-
-
-    def attack(self):
-        if self.weapon_sec != None or self.weapon_pri != None:
-            print("shooting...")
+        self.actions = ["attack", "dodge", "fall back", "shoot"]
+        self.env = Environment()
 
 
     def controls(self):
-        while self.moves in self.directions:
+        while True:
             user_input = input(f"Enter your move --> ").lower()
-            if user_input == "north":
-                print("heading north")
-            elif user_input == "south":
-                print("heading south")
-            elif user_input == "east":
-                print("heading east")
-            elif user_input == "west":
-                print("heading west")
+            if user_input in self.directions:
+                print(f"heading {user_input}")
             else:
                 print("Enter a valid direction")
     
-    def actions(self):
-        light_on = False
-        if "light" in self.inventory:
-            if light_on == False:
-                if self.currentEnv == "entrance":
-                    print("A beautifully decorated room")
-                    light_on = True
-                elif self.currentEnv == "basement":
-                    print("a room full of access to all kinds of hardwares")
-                    light_on = True
-                elif self.currentEnv == "armory":
-                    print("looks like this house is fully prepared to defend those walkers")
-                    light_on = True
-                elif light_on == True:
-                    print("it is already lighted")
+    def set_actions(self):
+        print(f"Current environment: {self.env.currentEnv}")  # Debugging line
+        if self.env.currentEnv == "armory":
+            print("after")
+            act = input(f"what would you like to do? {self.actions} ").strip().lower()
+            if act == "attack":
+                if self.weapon_pri is not None or self.weapon_sec is not None or self.third_weapon is not None:
+                    print("With chilling precision you blew its head off saving yourself")
+                else:
+                    print("You died")
+            elif act == "dodge":
+                print("You died")
+            elif act == "fall back":
+                print("you died")
         else:
-            print("not in inventory")
-    
+            print("before")
+
     def charLevel(self):
         pass
 
@@ -155,43 +153,34 @@ class Character(Environment):
         pass
              
 
-class TextBasedAdventureGame:
+class TextBasedAdventureGame():
     def __init__(self):
         self.hero = Character("Raiyan")
-        self.actions = ["light", "cook", "sleep"]
-
-    
-    def setActions(self):
-        if self.hero.currentEnv != None:
-            action = input(f"choose an action from {self.actions}: ")
-            if action in self.actions:
-                self.hero.actions()
-
-    
+        # self.env = Environment()
+        
+ 
     def run_game(self):
         cmd = input("Enter cmd (start/quit): ")
-        print(self.hero.init_env)
+        print(self.hero.env.init_env)  # Access the Environment instance through the Character's env attribute
         while True:
             if cmd == "start":
                 move = input("your call: ")
                 if "in" in move or "entrance" in move:
-                    self.hero.entrance()
-                    self.setActions()
+                    self.hero.env.entrance()
 
                 elif "bedroom" in move:
-                    self.hero.bedroom()
+                    self.hero.env.bedroom()
 
                 elif "basement" in move:
-                    self.hero.Basement()
-                    self.setActions()
-                
+                    self.hero.env.Basement()
+                    
                 elif "armory" in move:
-                    self.hero.armory()
-                    self.setActions()
+                    self.hero.env.armory()
+                    self.hero.set_actions()
 
-                elif move == "search": 
-                    self.hero.interaction()
-            
+                elif move == "search":
+                    self.hero.env.interaction()
+
             elif cmd == "quit":
                 confirm = input("Are you sure (y/n): ")
                 if confirm == "y":
